@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遠隔IoTスイッチ</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f4f4f9; padding-top: 50px; }
+        h1 { color: #333; }
+        .btn { display: inline-block; width: 150px; padding: 20px; margin: 10px; font-size: 20px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        #onBtn { background-color: #4CAF50; }
+        #offBtn { background-color: #f44336; }
+        .btn:active { opacity: 0.8; }
+        #status { margin-top: 20px; font-size: 18px; color: #666; }
+    </style>
+</head>
+<body>
+
+    <h1>遠隔スイッチ</h1>
+    
+    <button id="onBtn" class="btn">ONにする</button>
+    <button id="offBtn" class="btn">OFFにする</button>
+
+    <div id="status">現在の状態: 読み込み中...</div>
+
+    <script>
+        // 💡 判明した本物のURL（末尾はすべて小文字のswitch.json）に修正しました！
+        const url = "https://led-switch-4c42d-default-rtdb.asia-southeast1.firebasedatabase.app/switch.json";
+
+        function checkStatus() {
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const statusDiv = document.getElementById('status');
+                if (data === true) {
+                    statusDiv.innerText = "現在の状態: 🔵 ON";
+                    statusDiv.style.color = "#4CAF50";
+                } else if (data === false) {
+                    statusDiv.innerText = "現在の状態: 🔴 OFF";
+                    statusDiv.style.color = "#f44336";
+                } else {
+                    statusDiv.innerText = "現在の状態: ❓ 未設定 (ボタンを押してください)";
+                    statusDiv.style.color = "#666";
+                }
+            })
+            .catch(error => {
+                document.getElementById('status').innerText = "通信エラーが発生しました";
+            });
+        }
+
+        document.getElementById('onBtn').onclick = () => {
+            fetch(url, { method: 'PUT', body: JSON.stringify(true) }).then(() => checkStatus());
+        };
+
+        document.getElementById('offBtn').onclick = () => {
+            fetch(url, { method: 'PUT', body: JSON.stringify(false) }).then(() => checkStatus());
+        };
+
+        checkStatus();
+        setInterval(checkStatus, 1500);
+    </script>
+</body>
+</html>
